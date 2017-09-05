@@ -101,7 +101,7 @@ public class Main {
 			bufferedWriter = new BufferedWriter(fileWriter);
 			printWriter = new PrintWriter(bufferedWriter);
 			String startTime = new SimpleDateFormat("HH:mm:ss").format(new Date());
-			printWriter.println("START ".concat(startTime));
+			printWriter.println("START ".concat(startTime).concat("\n"));
 			bufferedWriter.flush();
 			
 		} catch (IOException e ) {
@@ -137,6 +137,7 @@ public class Main {
 		printWriter.print("Full-Search-Keywords: [" + Keymaster.topKeywords(masterKeywordMap) + "]");
 		
 		String startTime = new SimpleDateFormat("HH:mm:ss").format(new Date());
+		printWriter.println();
 		printWriter.println();
 		printWriter.println("END ".concat(startTime));
 		printWriter.close();
