@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -28,17 +29,24 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.io.PrintWriter;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+
 public class Main {
 	
 
 	// TEST HashSet for name/title objects
-	private static HashSet<NameTitleObject> masterSetNTO = new HashSet<>();
+	private static HashSet<PersonObject> masterSetPersonObjects = new HashSet<>();
 
 	// the origin of this crawl, first arg to main
 	private static String originUrl;
 
-	// name of file to be written to, second arg to main
-	private static String filename = "output";
+	// file I/O
+	private static String filename = "untitled";
+	private static FileWriter fileWriter;
+	private static BufferedWriter bufferedWriter;
+	private static PrintWriter printWriter;
 
 	// cap on emails to extract (if any), third arg to main
 	private static int extractionCap = 100;
@@ -84,6 +92,22 @@ public class Main {
 
 		crawlComplete = false;
 
+		//create PrintWriter for appending to the the output file
+		try {
+			filename = "Output_".concat(new SimpleDateFormat("MM.dd.yyyy").format(new Date()))
+					.concat("_" + NetworkUtils.getHostName(originUrl) + ".txt");
+			
+			fileWriter = new FileWriter(filename);
+			bufferedWriter = new BufferedWriter(fileWriter);
+			printWriter = new PrintWriter(bufferedWriter);
+			String startTime = new SimpleDateFormat("HH:mm:ss").format(new Date());
+			printWriter.println("START ".concat(startTime));
+			bufferedWriter.flush();
+			
+		} catch (IOException e ) {
+			e.printStackTrace();
+		}
+
 		while (!crawlComplete) {
 
 			if (!collectedLinks.iterator().hasNext()) {
@@ -99,45 +123,32 @@ public class Main {
 			try {
 				Thread.sleep((int) Math.random() * 300 + 1600 + (int) Math.random() * 300);
 			} catch (Exception e) {
-				// do nothing
+				e.printStackTrace();
 			}
 		}
 
 		System.out.println("Main.class -- CRAWL COMPLETE in " + ((System.nanoTime() - initialTime) / 1000000000 / 60)
 				+ "m -- now writing to file");
 
-		// build the info string, containing all the stats as listed below
-		StringBuilder infoString = new StringBuilder();
-		infoString.append(
+		printWriter.print(
 				"Contacts: ".concat(String.valueOf(masterContactSet.size()) + "/" + extractionCap + " -- Queries: ")
 						.concat(String.valueOf(pagesHit) + "/" + pageHitCap + " -- Urls Visited: "
 								+ String.valueOf(visitedLinks.size() + "\n")));
-		infoString.append("Omni-Keywords: [" + Abathur.topTenKeywords(masterKeywordMap).toString() + "]");
-		filename = "Output_".concat(new SimpleDateFormat("MM.dd.yyyy").format(new Date()))
-				.concat("_" + NetworkUtils.getHostName(originUrl) + ".txt");
-
-		IOUtils.generateFile(filename, masterContactSet, visitedLinks, infoString.toString());
-		// write a file with filename, the contact arraylist set, the contact
-		// extraction cap, visited link count, pages hit counter, and page hit
-		// cap
-		System.out.println("masterContactSet size: " + masterContactSet.size());
-		for (ContactObject o : masterContactSet) {
-			try {
-			System.out.println("Contact Object: " + o.mEmail + " | " + o.mNto.printFull() + o.mKeywords + o.mOrigin);
-			} catch (Exception e){
-				//meh
-			}
-		}
+		printWriter.print("Full-Search-Keywords: [" + Keymaster.topKeywords(masterKeywordMap) + "]");
+		
+		String startTime = new SimpleDateFormat("HH:mm:ss").format(new Date());
+		printWriter.println();
+		printWriter.println("END ".concat(startTime));
+		printWriter.close();
 
 	}
 
 	private static void setupArgs(String[] args) {
 		if (args.length == 0) {
-			originUrl = "http://www.newpaltz.edu";
+			originUrl = "http://www.nytimes.com";
 		} else if (args.length > 0) {
 			if (!(args[0] == null)) {
-				// if the user supplied url correctly, set the first arg as
-				// originUrl
+				// if the user supplied url correctly, set the first arg as origin URL
 				originUrl = args[0];
 			}
 			if (!(args[1] == null)) {
@@ -196,39 +207,50 @@ public class Main {
 	}
 
 	private static void pullContacts(String theBody, String currentUrl) {
-		System.out.println("Pulling contacts from html body: \n" + theBody);
 		// create a hashset from .purify function of page
 		HashSet<String> tempSetEmail = RegexUtils.findEmails(theBody, originUrl);
 //		HashSet<NameTitleObject> tempSetNTO = RegexUtils.findNames(RegexUtils.cleanText(theBody, originUrl, true, true, true, true, true));
-		HashSet<NameTitleObject> tempSetNTO = RegexUtils.findNames(theBody);
+		HashSet<PersonObject> tempSetPersonObject = RegexUtils.findNames(theBody);
 
 		
-		masterSetNTO.addAll(tempSetNTO); // add all to global holder, but we'll
+		masterSetPersonObjects.addAll(tempSetPersonObject); // add all to global holder, but we'll
 											// see if it's necessary
-		// TODO: match names with emails on page if possible
 		if (tempSetEmail.size() > 0) {
-			for (String item : tempSetEmail) {
+			for (String emailItem : tempSetEmail) {
 				// for each email collected on this page			
-				if (!emailInMasterContactSet(item)) {
+				if (!emailInMasterContactSet(emailItem)) {
 					// if not already collected, get ready to make a ContactObject
-					NameTitleObject thisNTO = null;
-					String[] keywordArray = Abathur.topTenKeywords(currentPageKeywordMap);
+					PersonObject thisPersonObject = null;
+					String[] keywordArray = Keymaster.topKeywords(currentPageKeywordMap);
 					
-					if (tempSetNTO.size() > 0) {
-						System.out.println("Main.pullContacts - NTOs > 0 on " + "currentUrl");
-						// if NameTitleObjects were discovered, try associating
-						// them
-						for (NameTitleObject nto : tempSetNTO) {
+					if (tempSetPersonObject.size() > 0) {
+						// if ContactObjects were discovered, try associating them
+						for (PersonObject po : tempSetPersonObject) {
 							// check name/email matching
-							if (Utils.emailMatchesNTO(item, nto)) {
+							if (Utils.emailMatchesPersonObject(emailItem, po)) {
 								// add NTO with email into Contact object
-								thisNTO = nto;
+								thisPersonObject = po;
 							}
 
 						}
 					} 
 					
-					masterContactSet.add(new ContactObject(item, thisNTO, keywordArray, currentUrl));
+					masterContactSet.add(new ContactObject(emailItem, thisPersonObject, keywordArray, currentUrl));
+					try {
+						if (emailItem != null){
+							printWriter.println(emailItem);
+						}
+						if (thisPersonObject != null){
+							printWriter.print(", " + thisPersonObject.printFull());
+						}
+						if (keywordArray != null){
+							printWriter.print(", " + String.join("_", keywordArray));
+						}
+						printWriter.println();
+						bufferedWriter.flush();
+					} catch (Exception e){
+						e.printStackTrace();
+					}
 				}
 			}
 		}
@@ -238,11 +260,10 @@ public class Main {
 		// this method pulls links from a page, if they haven't been visited,
 		// add into unvisited ArrayList<URL>
 
-		// call sister method to pull the relative links
+		// call sister method to pull relative links
 		pullRelativeLinks(htmlPage);
 
 		// test link pull with selenium
-
 		Document doc = Jsoup.parse(htmlPage);
 		Elements links = doc.select("a[href]");
 
@@ -359,7 +380,7 @@ public class Main {
 	private static void mapKeywords(String input) {
 		// pull the keywords from a page to put into page and master HashMaps
 		String hostName = NetworkUtils.getHostName(originUrl);
-		currentPageKeywordMap = Abathur
+		currentPageKeywordMap = Keymaster
 				.generateKeywordMap(RegexUtils.cleanText(input, hostName, true, true, true, true, false));
 		masterKeywordMap.putAll(currentPageKeywordMap);
 		return;
@@ -415,14 +436,15 @@ public class Main {
 		dc.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, "ignore");
 		dc.setCapability(ChromeOptions.CAPABILITY, options);
 		// set up WebDriver and link to the binary
-		File file = new File("/Users/brian/Drivers/chromedriver");
+		//TODO: Package such that the driver will be assumed to be in the same directory as initialization path
+		File file = new File(System.getProperty("user.dir") + "/chromedriver");
 		System.setProperty("webdriver.chrome.driver", file.getAbsolutePath());
 
 		// set it as a ChromeDriver, set it to the binary
 		driver = new ChromeDriver(dc);
 
 		driver.manage().timeouts().pageLoadTimeout(15, TimeUnit.SECONDS);
-		// set the timeout to 10 seconds
+		// set the timeout to X seconds
 	}
 
 
@@ -435,14 +457,13 @@ public class Main {
 			Alert alert = driver.switchTo().alert();
 			alert.accept();
 		} catch (Exception e) {
-			// exception means no popup
+			// exception means no popup, do nothing
 		}
 		;
 	}
 
 	public static boolean detectHoneypot(Element element) {
-		// helper method to detect whether an element is set to display:none
-		// implying it is used as a trap
+		// detect whether an element is set to display:none, these shouldn't be crawled
 		String idOfElement = null;
 		String classOfElement = null;
 
@@ -456,7 +477,8 @@ public class Main {
 				// if the id of element exists and is styled as display:none,
 				// could be a trap so return true
 				if (driver.findElement(By.id(idOfElement)).getCssValue("display").equals("none")) {
-					System.out.println("Main.detectHoneypot - display:none link or trap detected");
+					//element is no good
+					
 					return true;
 				}
 			}
@@ -481,9 +503,6 @@ public class Main {
 		}
 
 		return false;
-		// System.out.println("has attributes: " +
-		// element.attributes().get("id"));
-		// System.out.println(driver.findElement(By.id("honeypot")).getCssValue("display"));
 	}
 
 }

@@ -2,18 +2,6 @@ import java.util.ArrayList;
 
 public final class Filters {
 
-	public static final String[] titles = new String[] {
-			"chief executive officer", "chief financial officer", "chief operating officer", 
-			"chief marketing officer", "chief medical officer", "chief scientific officer",
-			"chief technology officer", "president", "vice president", "executive vice president", "senior vice president",
-			"chairman", "executive chairman", "vice chairman", "secretary", "director", "cofounder", "co-founder", 
-			"chief commercial officer", "corporate secretary", "chief legal officer", "chief communications officer"
-	};
-	
-	public static final String[] abbvTitles = new String[] {
-			"CEO", "CFO", "COO", "CMO", "CSO", "CCO", "CTO", "VP", "SVP", "EVP"
-	};
-
 	public static String[] monthStrings = new String[] { "january", "february", "march", "april", "may", "june", "july",
 			"august", "september", "october", "november", "december", "jan", "feb", "mar", "apr", "may", "jun", "jul",
 			"aug", "sep", "oct", "nov", "dec" };

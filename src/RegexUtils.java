@@ -11,79 +11,30 @@ public class RegexUtils {
 		// HashSet that will contain emails from input string
 		HashSet<String> emailsDiscovered = new HashSet<>();
 
-		// reverse email dodging tactics
-		String fixedInput = input.replaceAll("[\\s*\\[?\\(?]+[dD][oO][tT][\\)?\\]?\\s*]+", "\\.")
-				.replaceAll("[\\s*\\[?\\(?]+[aA][tT][\\)?\\]?\\s*]+", "@").replaceAll(",", " ");
-		// last bit is experimental, replace commas with spaces for potential
-		// emails delimited by commas
-
-		// take out everything except the emails within the string, return as
-		// array
-		// split input into array using delimiter of unlimited whitespace to
-		// capture everything
-		String[] splitWordArray = fixedInput.split("\\s+");
-		System.out.println("RegexUtils.purify " + "length of input array: " + splitWordArray.length);
-		// System.out.println("searchTerm is " + searchTerm);
-		// NO SEARCH TERM FEATURE atm
+		// take out everything except the emails within the string, return as array
+		// split input into array using delimiter of unlimited whitespace to capture everything
+		String[] splitWordArray = input.split("\\s+");
 
 		for (String word : splitWordArray) {
 
 			if (word != null) {
-				// if the word fits the format of an email (e.g.
-				// john.doe@email.com), consider it for HashSet
+				// if the word fits the format of an email (e.g.john.doe@email.com), consider it for HashSet
 
 				// strip out only the text between potential HTML tags, filter
 				// out filenames and API things
-				String regex = "([^>=\"'\\/@\\(\\);:]+)@(\\w+\\.)?(\\w+)\\.([[a-z[A-Z]]&&[^<\"]]+)";
-				// group 1 is 'username' group 2 is subdomain of url if exists,
-				// group 3 is domain like 'gmail' group 4 is like .com
-				Pattern pattern = Pattern.compile(regex);
+				// group 1 is 'username' group 2 is subdomain of url if exists, regex just negates chars that aren't valid for usernames
+				// group 3 is domain like 'gmail' group 4 is like '.com'
+				
+				//RFC822 compliant regex for emails
+				Pattern pattern = Pattern.compile("(?:(?:\\r\\n)?[ \\t])*(?:(?:(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*))*@(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*|(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)*\\<(?:(?:\\r\\n)?[ \\t])*(?:@(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*(?:,@(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*)*:(?:(?:\\r\\n)?[ \\t])*)?(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*))*@(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*\\>(?:(?:\\r\\n)?[ \\t])*)|(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)*:(?:(?:\\r\\n)?[ \\t])*(?:(?:(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*))*@(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*|(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)*\\<(?:(?:\\r\\n)?[ \\t])*(?:@(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*(?:,@(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*)*:(?:(?:\\r\\n)?[ \\t])*)?(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*))*@(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*\\>(?:(?:\\r\\n)?[ \\t])*)(?:,\\s*(?:(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*))*@(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*|(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)*\\<(?:(?:\\r\\n)?[ \\t])*(?:@(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*(?:,@(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*)*:(?:(?:\\r\\n)?[ \\t])*)?(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*))*@(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*\\>(?:(?:\\r\\n)?[ \\t])*))*)?;\\s*)");
 				Matcher matcher = pattern.matcher(word);
 				if (matcher.find()) {
-					// System.out.println("Group 1: " + matcher.group(1));
-					// System.out.println("Group 2: " + matcher.group(2));
-					// System.out.println("Group 3: " + matcher.group(3));
-					// System.out.println("Group 4: " + matcher.group(4));
-					// TESTS
+					
+					word = matcher.group();
+					word = word.replaceAll("mailto:", "");
+					emailsDiscovered.add(word.toLowerCase());
+					System.out.println("RegexUtils.purify discovered email: " + word);
 
-					// if the word matches and contains searchTerm ("" by
-					// default), add it in
-					System.out.println("purify" + " group(1) of this potential email: " + matcher.group(1));
-					if (!matcher.group(4).matches("jpg|jpeg|gif|png|calendar|cc|facebook|issu")
-							&& matcher.group(3).length() > 1) {
-						// if the group 3 - like the '.com' part - isn't bogus
-						// then this might be legit
-						if (!matcher.group(3).matches("example|email|contoso|sentry|calendar|facebook")
-								&& !matcher.group(3).startsWith("www") && matcher.group(1).length() > 1) {
-							// check group 3, which should be the email service
-							// provider like "gmail", not start with www or
-							// weird stuff
-							if (!matcher.group(1).matches("someone|username|example|user")) {
-								// check group 1 which is the address, like
-								// "john.doe"
-
-								if ((matcher.group(2) == null) || !(matcher.group(2).matches("www."))) {
-									// if the subdomain of email exists it
-									// should NOT be www.
-									word = matcher.group();
-									word = word.replaceAll("mailto:", "");
-									emailsDiscovered.add(word.toLowerCase());
-									System.out.println("RegexUtils.purify discovered email: " + word);
-								}
-
-								// if (origin.contains(matcher.group(3))){
-								// //if the group 3 part is contained within the
-								// origin url, like "library.stonybrook" with SB
-								// origin
-								// word.replaceAll(matcher.group(3),
-								// origin.replaceAll("www.", ""));
-								// //replace the group 3 with the host name,
-								// minus the www. if it exists in origin
-								// }
-
-							}
-						}
-					}
 				}
 			}
 		}
@@ -93,7 +44,7 @@ public class RegexUtils {
 
 	}
 
-	public static HashSet<NameTitleObject> findNames(String input) {
+	public static HashSet<PersonObject> findNames(String input) {
 		//get rid of non-name words that might register as names
 		Pattern p = Pattern.compile("[A-Z][a-z]+");
 		Matcher m = p.matcher(input);
@@ -104,31 +55,28 @@ public class RegexUtils {
 		}
 
 		Pattern pattern = Pattern.compile(
-				"([A-Z][a-z\\-]+)_([A-Z]\\.?_)?([A-Z][A-Za-z\\-\\']+)(,?_?[A-Z[hilsqed\\.]]+\\.?)*\n?\n?([A-Z]([A-Za-z,&\\.]_?)+)?\n?");
+				"([A-Z][a-z\\-]+)_([A-Z]\\.?_)?([A-Z][A-Za-z\\-\\']+)");
 		Matcher matcher = pattern.matcher(input.replaceAll(" ", "_"));
-		HashSet<NameTitleObject> temp = new HashSet<>();
+		HashSet<PersonObject> temp = new HashSet<>();
 		while (matcher.find()) {
 			try {
 //				System.out.println("RegexUtils HIT|||--- " + matcher.group() + "\n");
 
-				// store these fields to create a NameTitleObject
+				// store these fields to create a PersonObject
 				String fName = "";
 				String mInitial = "";
 				String lName = "";
-				String degree = "";
-				StringBuilder position = new StringBuilder();
 
 				boolean flag = true;
-				// flag to check if the potential NameTitleObject is valid (eg
-				// has first & last name at least)
+				// flag to check if the potential PersonObject is valid - has first & last name)
 
 				if (matcher.group(1) != null && !Utils.wordInFilter(matcher.group(1), Filters.frequentEnglish) && 
 						!Utils.wordInFilter(matcher.group(1), Filters.internetCommon)) {
 					// group 1 should be the first name
 					fName = matcher.group(1);
 				} else {
-					// NTO needs a valid first name!
-					System.out.println("REJECT -- First Name " + matcher.group(1));
+					// PersonObject needs a valid first name!
+//					System.out.println("REJECT -- First Name " + matcher.group(1));
 					flag = false;
 				}
 
@@ -144,38 +92,15 @@ public class RegexUtils {
 					lName = matcher.group(3);
 				} else {
 					// NTO needs a valid last name!
-					System.out.println("REJECT -- Last name" + matcher.group(2));
+//					System.out.println("REJECT -- Last name" + matcher.group(2));
 					flag = false;
 				}
-
-				 if (matcher.group(4) != null && matcher.group(3) != null) {
-				 // group 4 should be the degree
-					 degree = matcher.group(4);
-				 }
 				 
-				 
-				if (matcher.group(5) != null && matcher.group(3) != null) {
-					// group 5 should be second line after name, not good if no
-					// last name (grp 3)
-					// group 4 skipped because only holds titles
-					for (String abbvTitle : Filters.abbvTitles){
-						if (matcher.group(5).toLowerCase().replaceAll("_", " ").contains(abbvTitle)){
-							position.append(matcher.group(5) + " ");
-						}
-					}
-					for (String title : Filters.titles){
-						if (matcher.group(5).toLowerCase().replaceAll("_", " ").contains(title)){
-							position.append(matcher.group(5) + " ");
-						}
-					}
-//					position.append(matcher.group(5));
-				}
 
 				if (flag) {
-					// NTO is legit because flag is true, create new
-					// NameTitleObject with info
-					System.out.println("Creating new NTO: " + fName + " " + lName + ", position: " + position + "\n");
-					temp.add(new NameTitleObject(fName, mInitial, lName, degree, position.toString().replaceAll("_", " ")));
+					// PersonObject is legit because flag is true, create new one with given info
+					System.out.println("Creating new Person Object: " + fName + ", " + lName + ", \n");
+					temp.add(new PersonObject(fName, mInitial, lName));
 				}
 
 			} catch (Exception e) {

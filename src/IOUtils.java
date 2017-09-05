@@ -37,8 +37,8 @@ public class IOUtils {
 				// add all the contact objects into the builder
 				builder.append(item.mEmail);
 				builder.append("  ,  ");
-				if (item.mNto != null) {
-					builder.append(item.mNto.printFull());
+				if (item.mPersonObject != null) {
+					builder.append(item.mPersonObject.printFull());
 					builder.append("  ,  ");
 				} else {
 					builder.append("  ,  ");
@@ -74,16 +74,4 @@ public class IOUtils {
 
 	}
 
-	public static void writeFile(String filename, String content) {
-		String ldt = LocalDateTime.now().toString().replace("T", " ");
-		try {
-			content = ldt + "\n" + content;
-			// write into a file in the same directory
-			PrintWriter writer = new PrintWriter(filename, "UTF-8");
-			writer.println(content);
-			writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 }
