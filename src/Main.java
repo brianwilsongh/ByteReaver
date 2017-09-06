@@ -104,6 +104,12 @@ public class Main {
 			printWriter.println("START ".concat(startTime).concat("\n"));
 			bufferedWriter.flush();
 			
+			try {
+				Runtime.getRuntime().addShutdownHook(new ShutdownThread());
+			} catch (Exception e){
+				e.printStackTrace();
+			}
+			
 		} catch (IOException e ) {
 			e.printStackTrace();
 		}
@@ -129,19 +135,25 @@ public class Main {
 
 		System.out.println("Main.class -- CRAWL COMPLETE in " + ((System.nanoTime() - initialTime) / 1000000000 / 60)
 				+ "m -- now writing to file");
-
-		printWriter.print(
-				"Contacts: ".concat(String.valueOf(masterContactSet.size()) + "/" + extractionCap + " -- Queries: ")
-						.concat(String.valueOf(pagesHit) + "/" + pageHitCap + " -- Urls Visited: "
-								+ String.valueOf(visitedLinks.size() + "\n")));
-		printWriter.print("Full-Search-Keywords: [" + Keymaster.topKeywords(masterKeywordMap) + "]");
-		
-		String startTime = new SimpleDateFormat("HH:mm:ss").format(new Date());
-		printWriter.println();
-		printWriter.println();
-		printWriter.println("END ".concat(startTime));
-		printWriter.close();
-
+	}
+	
+	static class ShutdownThread extends Thread {
+		public void run() {
+			//ensure that exit stats are calculated and printWriter closed at end
+			System.out.println("Trigger shutdown hook");
+			String startTime = new SimpleDateFormat("HH:mm:ss").format(new Date());
+			printWriter.println();
+			printWriter.println();
+			printWriter.println("END ".concat(startTime));
+			printWriter.println();
+			printWriter.print(
+					"Contacts: ".concat(String.valueOf(masterContactSet.size()) + "/" + extractionCap + " -- Queries: ")
+							.concat(String.valueOf(pagesHit) + "/" + pageHitCap + " -- Urls Visited: "
+									+ String.valueOf(visitedLinks.size() + "\n")));
+			printWriter.print("Full-Search-Keywords: " + String.join("_", Keymaster.topKeywords(masterKeywordMap)));
+			
+			printWriter.close();
+		}
 	}
 
 	private static void setupArgs(String[] args) {
@@ -173,11 +185,12 @@ public class Main {
 		// before attempting to hit the page, add link to visited and clean
 		try {
 			System.out.println(
-					"Query#" + pagesHit + " Emails: " + masterContactSet.size() + " , currently at address: " + url);
+					"Query#" + pagesHit + " Contacts: " + masterContactSet.size() + " , currently at address: " + url);
 
 			driver.get(url);
 			// try to visit the URL, catch if there is a Timeout Exception
 
+			//trigger this method no matter what to prevent js alert from ending run?
 			handleJavascriptAlert(driver);
 
 			String theHtml = driver.getPageSource();
@@ -194,13 +207,13 @@ public class Main {
 				pullLinks(theHtml);
 			}
 
-			// clean tracks and wait (UNTESTED)
+			// clean tracks and wait (THIS IS UNTESTED)
 			driver.manage().deleteAllCookies();
 			return;
 
 		} catch (Exception e) {
 			// timeout exception possible, so catch and consider URL visited,
-			// restart chrome
+			// kill browser and spawn a new instance
 			System.out.println(url + " took too long to load or failed to handle JS popup!");
 			driver.close();
 			initiateWebdriver();
@@ -210,10 +223,8 @@ public class Main {
 	private static void pullContacts(String theBody, String currentUrl) {
 		// create a hashset from .purify function of page
 		HashSet<String> tempSetEmail = RegexUtils.findEmails(theBody, originUrl);
-//		HashSet<NameTitleObject> tempSetNTO = RegexUtils.findNames(RegexUtils.cleanText(theBody, originUrl, true, true, true, true, true));
 		HashSet<PersonObject> tempSetPersonObject = RegexUtils.findNames(theBody);
 
-		
 		masterSetPersonObjects.addAll(tempSetPersonObject); // add all to global holder, but we'll
 											// see if it's necessary
 		if (tempSetEmail.size() > 0) {
