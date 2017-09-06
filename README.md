@@ -14,7 +14,7 @@ To initiate with a java path of "java", one would type something like the follow
 
 ###Additional Features
 
-ByteReaver writes files dynamically, as data are received. If the program is interrupted in the middle of a crawl, contacts will not be lost, although the end-run statistics will not be calculated.
+ByteReaver writes files dynamically, as data are received. If the program is interrupted in the middle of a crawl, contacts will not be lost, and post-run statistics will still be calculated!
 
 ###Future Plans
 
