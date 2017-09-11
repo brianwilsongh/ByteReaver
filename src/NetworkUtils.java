@@ -98,7 +98,7 @@ public class NetworkUtils {
 	public static String getHostName(String urlA) {
 		// just get the host eg 'www.example.com'
 		URL theBuiltUrl = makeURL(urlA, null);
-		System.out.println("this should be like www.example.com -- test: " + theBuiltUrl.getHost());
+//		System.out.println("this should be like www.example.com -- test: " + theBuiltUrl.getHost());
 		return theBuiltUrl.getHost();
 	}
 	
