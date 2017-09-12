@@ -4,7 +4,7 @@ ByteReaver is a program that crawls webpages within a domain to retrieve informa
 
 ### How to Use It
 
-The program will require an installation of Java, and the ability to execute the main .jar file from the command line. The Chrome Driver executable (v 2.29) should be included in the repository as 'chromium.exe', and should work with any Chrome Drivers that are 2.29+. It must be in the same directory as the .jar to work.
+The program will require an installation of Java, and the ability to execute the main .jar file from the command line. The Chrome Driver executable (v 2.29) should be included in the repository as a 'chromedriver' executable, and should work with any Chrome Drivers that are 2.29+. It must be in the same directory as the .jar to work.
 
 To initiate with a java path of "java", one would type something like the following:
 
