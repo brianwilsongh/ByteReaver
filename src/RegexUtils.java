@@ -164,7 +164,7 @@ public class RegexUtils {
 		if (url.matches(".+(.jpg|.jpeg|.png|.gif|.pdf|.stm|.aspx|#|.xml|.json){1}$")
 				|| url.matches("^(#|mailto:|tel:|redirect){1}.+") || url.contains("javascript")) {
 			// if the url ends in a filename like those above, it's no good
-			System.out.println("RegexUtils.unwanted deemed <" + url + "> to be undesireable destination url");
+//			System.out.println("RegexUtils.unwanted deemed <" + url + "> to be undesireable destination url");
 			return true;
 		}
 		return false;
@@ -188,7 +188,7 @@ public class RegexUtils {
 		for (String word : dirtyWordArray) {
 			if (word.matches("[a-z[A-Z]]+") && !word.matches("null") && !origin.contains(word.toLowerCase())
 					&& !word.matches("[EeCcMmPp][DdSs][Tt]")) {
-				// if the word is made up entirely of alphabet chars
+				// if the word is made up entirely of alphabet chars, is not a date, does not match name of the domain
 				if (passedKeywordFilter(word.toLowerCase(), filterMonth, filterDay, filterCommon, filterInternetCommon,
 						filterGeography)) {
 					cleanString.append(word);

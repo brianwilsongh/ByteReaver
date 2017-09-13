@@ -41,6 +41,24 @@ public final class Utils {
 		}
 		return flag;
 	}
+	
+	  public static boolean wordInBinarySearchFilter(String word, String[] alphabeticalFilter){
+		//special bsearch method for filters arranged alphabetically into an array
+		int bottomIdx = 0;
+		int topIdx = alphabeticalFilter.length - 1;
+			
+		while (bottomIdx <= topIdx){
+			int midIdx = (int) Math.floor(((topIdx - bottomIdx) / 2) + bottomIdx);
+			if (alphabeticalFilter[midIdx].toLowerCase().equals(word.toLowerCase())) {
+				return true;
+			} else if (alphabeticalFilter[midIdx].toLowerCase().compareTo(word.toLowerCase()) > 0) {
+				topIdx = midIdx - 1;
+			} else if (alphabeticalFilter[midIdx].toLowerCase().compareTo(word.toLowerCase()) < 0) {
+				bottomIdx = midIdx + 1;
+			}
+		}
+		return false;
+	}
 
 	public static boolean wordInAnyFilter(String word) {
 		// TODO: make this enitre implementation less sloppy

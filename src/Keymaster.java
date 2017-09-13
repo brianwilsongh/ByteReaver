@@ -10,10 +10,6 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-/**
- * Created by brian on 3/20/17.
- */
-
 public final class Keymaster {
 
 	private static int wordCount = 0;
