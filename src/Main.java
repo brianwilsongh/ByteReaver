@@ -2,8 +2,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,7 +32,6 @@ import java.io.FileWriter;
 import java.io.BufferedWriter;
 
 public class Main {
-	
 
 	// TEST HashSet for name/title objects
 	private static HashSet<PersonObject> masterSetPersonObjects = new HashSet<>();
@@ -92,25 +89,25 @@ public class Main {
 
 		crawlComplete = false;
 
-		//create PrintWriter for appending to the the output file
+		// create PrintWriter for appending to the the output file
 		try {
 			filename = "Output_".concat(new SimpleDateFormat("MM.dd.yyyy").format(new Date()))
 					.concat("_" + NetworkUtils.getHostName(originUrl) + ".txt");
-			
+
 			fileWriter = new FileWriter(filename);
 			bufferedWriter = new BufferedWriter(fileWriter);
 			printWriter = new PrintWriter(bufferedWriter);
 			String startTime = new SimpleDateFormat("HH:mm:ss").format(new Date());
 			printWriter.println("START ".concat(startTime).concat("\n"));
 			bufferedWriter.flush();
-			
+
 			try {
 				Runtime.getRuntime().addShutdownHook(new ShutdownThread());
-			} catch (Exception e){
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
-		} catch (IOException e ) {
+
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
@@ -134,13 +131,14 @@ public class Main {
 		}
 
 		System.out.println("Main.class -- CRAWL COMPLETE in " + ((System.nanoTime() - initialTime) / 1000000000 / 60)
-				+ "m -- now writing to file");
+				+ "m -- shutting down");
 	}
-	
+
 	static class ShutdownThread extends Thread {
 		public void run() {
-			//ensure that exit stats are calculated and printWriter closed at end
-			System.out.println("Trigger shutdown hook");
+			// ensure that exit stats are calculated and printWriter closed at
+			// end
+			System.out.println("Shutdown Thread Executed @ " + new SimpleDateFormat("MM.dd.yyyy HH.mm.ss").format(new Date()));
 			String startTime = new SimpleDateFormat("HH:mm:ss").format(new Date());
 			printWriter.println();
 			printWriter.println();
@@ -151,7 +149,7 @@ public class Main {
 							.concat(String.valueOf(pagesHit) + "/" + pageHitCap + " -- Urls Visited: "
 									+ String.valueOf(visitedLinks.size() + "\n")));
 			printWriter.print("Full-Search-Keywords: " + String.join("_", Keymaster.topKeywords(masterKeywordMap)));
-			
+
 			printWriter.close();
 		}
 	}
@@ -161,7 +159,8 @@ public class Main {
 			originUrl = "http://www.nytimes.com";
 		} else if (args.length > 0) {
 			if (!(args[0] == null)) {
-				// if the user supplied url correctly, set the first arg as origin URL
+				// if the user supplied url correctly, set the first arg as
+				// origin URL
 				originUrl = args[0];
 			}
 			if (!(args[1] == null)) {
@@ -190,7 +189,8 @@ public class Main {
 			driver.get(url);
 			// try to visit the URL, catch if there is a Timeout Exception
 
-			//trigger this method no matter what to prevent js alert from ending run?
+			// trigger this method no matter what to prevent js alert from
+			// ending run?
 			handleJavascriptAlert(driver);
 
 			String theHtml = driver.getPageSource();
@@ -225,18 +225,21 @@ public class Main {
 		HashSet<String> tempSetEmail = RegexUtils.findEmails(theBody, originUrl);
 		HashSet<PersonObject> tempSetPersonObject = RegexUtils.findNames(theBody);
 
-		masterSetPersonObjects.addAll(tempSetPersonObject); // add all to global holder, but we'll
-											// see if it's necessary
+		masterSetPersonObjects.addAll(tempSetPersonObject); // add all to global
+															// holder, but we'll
+		// see if it's necessary
 		if (tempSetEmail.size() > 0) {
 			for (String emailItem : tempSetEmail) {
-				// for each email collected on this page			
+				// for each email collected on this page
 				if (!emailInMasterContactSet(emailItem)) {
-					// if not already collected, get ready to make a ContactObject
+					// if not already collected, get ready to make a
+					// ContactObject
 					PersonObject thisPersonObject = null;
 					String[] keywordArray = Keymaster.topKeywords(currentPageKeywordMap);
-					
+
 					if (tempSetPersonObject.size() > 0) {
-						// if ContactObjects were discovered, try associating them
+						// if ContactObjects were discovered, try associating
+						// them
 						for (PersonObject po : tempSetPersonObject) {
 							// check name/email matching
 							if (Utils.emailMatchesPersonObject(emailItem, po)) {
@@ -245,22 +248,22 @@ public class Main {
 							}
 
 						}
-					} 
-					
+					}
+
 					masterContactSet.add(new ContactObject(emailItem, thisPersonObject, keywordArray, currentUrl));
 					try {
-						if (emailItem != null){
+						if (emailItem != null) {
 							printWriter.println(emailItem);
 						}
-						if (thisPersonObject != null){
+						if (thisPersonObject != null) {
 							printWriter.print(", " + thisPersonObject.printFull());
 						}
-						if (keywordArray != null){
+						if (keywordArray != null) {
 							printWriter.print(", " + String.join("_", keywordArray));
 						}
 						printWriter.println();
 						bufferedWriter.flush();
-					} catch (Exception e){
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
@@ -329,7 +332,8 @@ public class Main {
 						relativeUrl = "/".concat(relativeUrl);
 						// make sure there's a slash in the relative Url before
 						// concatting to origin!
-//						System.out.println("relativeUrl did not start with a slash! Fixed to: " + relativeUrl);
+						// System.out.println("relativeUrl did not start with a
+						// slash! Fixed to: " + relativeUrl);
 					}
 
 					String absLink;
@@ -414,7 +418,8 @@ public class Main {
 
 	private static boolean emailInMasterContactSet(String email) {
 		// check if email was already stored in the master contact hash to
-		// prevent duplicates, even if origins are different, emails are primary identifier of contact objects
+		// prevent duplicates, even if origins are different, emails are primary
+		// identifier of contact objects
 		boolean flag = false;
 		for (ContactObject co : masterContactSet) {
 			// System.out.println("comparing current email -- " + email + "--
@@ -448,7 +453,8 @@ public class Main {
 		dc.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, "ignore");
 		dc.setCapability(ChromeOptions.CAPABILITY, options);
 		// set up WebDriver and link to the binary
-		//TODO: Package such that the driver will be assumed to be in the same directory as initialization path
+		// TODO: Package such that the driver will be assumed to be in the same
+		// directory as initialization path
 		File file = new File(System.getProperty("user.dir") + "/chromedriver");
 		System.setProperty("webdriver.chrome.driver", file.getAbsolutePath());
 
@@ -458,7 +464,6 @@ public class Main {
 		driver.manage().timeouts().pageLoadTimeout(15, TimeUnit.SECONDS);
 		// set the timeout to X seconds
 	}
-
 
 	public static void handleJavascriptAlert(WebDriver driver) {
 		// wait and intercept JS alert if it occurs on a page
@@ -475,7 +480,8 @@ public class Main {
 	}
 
 	public static boolean detectHoneypot(Element element) {
-		// detect whether an element is set to display:none, these shouldn't be crawled
+		// detect whether an element is set to display:none, these shouldn't be
+		// crawled
 		String idOfElement = null;
 		String classOfElement = null;
 
@@ -489,8 +495,8 @@ public class Main {
 				// if the id of element exists and is styled as display:none,
 				// could be a trap so return true
 				if (driver.findElement(By.id(idOfElement)).getCssValue("display").equals("none")) {
-					//element is no good
-					
+					// element is no good
+
 					return true;
 				}
 			}
