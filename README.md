@@ -4,9 +4,9 @@ ByteReaver is a program that crawls webpages within a domain to retrieve informa
 
 ### How to Use It
 
-The program will require an installation of Java, and a Unix command line (Terminal) to run the program. ByteReaver has not yet been tested on Windows or Linux.
+The program will require an installation of Java, and a Unix command line (Terminal) to run the program. ByteReaver has not yet been tested on Windows or Linux, and at time of writing has only been tested on macOS Sierra 10.12.
 
-On MacOS, you can launch an instance of Terminal by finding the icon in the Launchpad in the "Other" section.
+On macOS, you can launch an instance of Terminal by finding the icon in the "Other" section of Launchpad.
 
 ![screenshot of options section of Launchpad](https://i.imgur.com/xWSSo9X.png)
 
@@ -24,11 +24,13 @@ If the installation was performed properly, and if the terminal window was navig
 
 Note that if an error like this is received:
 `Error: Unable to access jarfile Test.jar`
- it means that the terminal window is not in the same directory as the jar file. Please see [this tutorial](http://www.westwind.com/reference/os-x/commandline/navigation.html) to learn how to navigate using the terminal if you are unsure how to change directory in Terminal.
+ it means that the terminal window is not in the same directory as the jar file. Please see [this tutorial](http://www.westwind.com/reference/os-x/commandline/navigation.html) to learn how to navigate using the terminal if you don't know how to do it.
 
 In the initialization command, the '123' and '345' represent parameters telling the program the maximum number of contacts to extract and the largest number of queries to be made, respectively. These parameters will default to 100 and 1,000, respectively.
 
-You will know that the program initiated successfully if a new instance of chrome appears on your screen and if a new file was created in the root directory of ByteReaver.
+You will know that the program initiated successfully if a new instance of chrome appears on your screen and if a new file was created in the root directory of ByteReaver. Terminal will also respond, outputting URLs as Chrome begins to visit them.
+
+![Initiation of ByteReaver](https://i.imgur.com/9VBxfDj.png)
 
 ### Additional Features
 
