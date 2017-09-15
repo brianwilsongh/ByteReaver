@@ -51,7 +51,7 @@ public final class Utils {
 		while (bottomIdx <= topIdx){
 			int midIdx = (topIdx + bottomIdx) / 2;
 			if (alphabeticalFilter[midIdx].equals(word)) {
-				System.out.println("REJECT: keyword in filter: " + alphabeticalFilter[midIdx] + " matches: " + word);
+//				System.out.println("REJECT: keyword in filter: " + alphabeticalFilter[midIdx] + " matches: " + word);
 				return true;
 			} else if (alphabeticalFilter[midIdx].compareTo(word) > 0) {
 				topIdx = midIdx - 1;
@@ -59,7 +59,7 @@ public final class Utils {
 				bottomIdx = midIdx + 1;
 			}
 		}
-		System.out.println("new keyword: " + word);
+//		System.out.println("new keyword: " + word);
 		return false;
 	}
 

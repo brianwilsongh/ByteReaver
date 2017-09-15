@@ -107,7 +107,7 @@ public class RegexUtils {
 				if (flag) {
 					// PersonObject is legit because flag is true, create new
 					// one with given info
-					System.out.println("Creating new Person Object: " + fName + ", " + lName + ", \n");
+//					System.out.println("Creating new Person Object: " + fName + ", " + lName + ", \n");
 					temp.add(new PersonObject(fName, mInitial, lName));
 				}
 
