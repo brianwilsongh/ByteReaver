@@ -33,7 +33,7 @@ import java.io.BufferedWriter;
 
 public class Main {
 
-	// TEST HashSet for name/title objects
+	// experimental HashSet for name/title objects, currently not being used
 	private static HashSet<PersonObject> masterSetPersonObjects = new HashSet<>();
 
 	// the origin of this crawl, first arg to main
@@ -82,7 +82,7 @@ public class Main {
 		pagesHit++;
 		driver.get(originUrl);
 		visitedLinks.add(originUrl);
-		handleJavascriptAlert(driver);
+//		handleJavascriptAlert(driver);
 		mapKeywords(driver.findElement(By.tagName("body")).getText());
 		pullContacts(driver.findElement(By.tagName("body")).getText(), originUrl);
 		pullLinks(driver.getPageSource());
@@ -189,9 +189,7 @@ public class Main {
 			driver.get(url);
 			// try to visit the URL, catch if there is a Timeout Exception
 
-			// trigger this method no matter what to prevent js alert from
-			// ending run?
-			handleJavascriptAlert(driver);
+//			handleJavascriptAlert(driver);
 
 			String theHtml = driver.getPageSource();
 			String theBody = driver.findElement(By.tagName("body")).getText();
@@ -225,9 +223,8 @@ public class Main {
 		HashSet<String> tempSetEmail = RegexUtils.findEmails(theBody, originUrl);
 		HashSet<PersonObject> tempSetPersonObject = RegexUtils.findNames(theBody);
 
-		masterSetPersonObjects.addAll(tempSetPersonObject); // add all to global
-															// holder, but we'll
-		// see if it's necessary
+		masterSetPersonObjects.addAll(tempSetPersonObject); //not currently being used
+		
 		if (tempSetEmail.size() > 0) {
 			for (String emailItem : tempSetEmail) {
 				// for each email collected on this page
@@ -253,14 +250,16 @@ public class Main {
 					masterContactSet.add(new ContactObject(emailItem, thisPersonObject, keywordArray, currentUrl));
 					try {
 						if (emailItem != null) {
-							printWriter.println(emailItem);
+							printWriter.print(emailItem);
 						}
 						if (thisPersonObject != null) {
 							printWriter.print(", " + thisPersonObject.printFull());
 						}
 						if (keywordArray != null) {
-							printWriter.print(", " + String.join("_", keywordArray));
+							//no keywords
+//							printWriter.print(", " + String.join("_", keywordArray));
 						}
+						printWriter.println(""); // just to get to the next line
 						printWriter.println();
 						bufferedWriter.flush();
 					} catch (Exception e) {
@@ -465,19 +464,20 @@ public class Main {
 		// set the timeout to X seconds
 	}
 
-	public static void handleJavascriptAlert(WebDriver driver) {
-		// wait and intercept JS alert if it occurs on a page
-		try {
-			// time interval as second arg of constructor is in seconds
-			WebDriverWait wait = new WebDriverWait(driver, 1);
-			wait.until(ExpectedConditions.alertIsPresent());
-			Alert alert = driver.switchTo().alert();
-			alert.accept();
-		} catch (Exception e) {
-			// exception means no popup, do nothing
-		}
-		;
-	}
+	//TEST WITHOUT THIS
+//	public static void handleJavascriptAlert(WebDriver driver) {
+//		// wait and intercept JS alert if it occurs on a page
+//		try {
+//			// time interval as second arg of constructor is in seconds
+//			WebDriverWait wait = new WebDriverWait(driver, 1);
+//			wait.until(ExpectedConditions.alertIsPresent());
+//			Alert alert = driver.switchTo().alert();
+//			alert.accept();
+//		} catch (Exception e) {
+//			// exception means no popup, do nothing
+//		}
+//		;
+//	}
 
 	public static boolean detectHoneypot(Element element) {
 		// detect whether an element is set to display:none, these shouldn't be
