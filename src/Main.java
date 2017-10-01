@@ -371,43 +371,21 @@ public class Main {
 		return;
 	}
 
-	private static boolean urlInLinkedList(URL url, LinkedList<String> list) {
-		// checks if the URL is in a provided HashSet with an improved for loop
-		boolean returnBoolean = false;
-
-		for (String item : list) {
-			if (NetworkUtils.urlHostPathMatch(NetworkUtils.makeURL(item, originUrl), url)) {
-				// Log.v("DLAsync.urlInHashSet", " just found " + url.toString()
-				// + " in " + set.toString());
-				returnBoolean = true;
-			}
-		}
-		return returnBoolean;
-	}
-
 	private static boolean emailInMasterContactSet(String email) {
-		// check if email was already stored in the master contact hash to
-		// prevent duplicates, even if origins are different, emails are primary
-		// identifier of contact objects
+		// check if email was already stored in the master contact hash 
+		//TODO: Determine whether this and contact object system should be removed
 		boolean flag = false;
 		for (ContactObject co : masterContactSet) {
-			// System.out.println("comparing current email -- " + email + "--
-			// with master contact set email -- " + contact.get(0) );
 			if (co.mEmail.equals(email)) {
-				// System.out.println("emailInContactSet comparison: " +
-				// contact.get(0) + " and " + email + " returns: " +
-				// (contact.get(0) == email));
 				flag = true;
 			}
 		}
 		return flag;
 	}
-	// END OF CRAWLER METHODS!!
 
 	public static void initiateWebdriver() {
 
-		// set chrome to ignore loading images and css passing in special
-		// capability
+		// set chrome to ignore loading images and css passing
 		HashMap<String, Object> images = new HashMap<String, Object>();
 		images.put("images", 2);
 
@@ -422,8 +400,7 @@ public class Main {
 		dc.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, "ignore");
 		dc.setCapability(ChromeOptions.CAPABILITY, options);
 		// set up WebDriver and link to the binary
-		// TODO: Package such that the driver will be assumed to be in the same
-		// directory as initialization path
+		
 		File file = new File(System.getProperty("user.dir") + "/chromedriver");
 		System.setProperty("webdriver.chrome.driver", file.getAbsolutePath());
 
@@ -434,61 +411,35 @@ public class Main {
 		// set the timeout to X seconds
 	}
 
-	//TEST WITHOUT THIS
-//	public static void handleJavascriptAlert(WebDriver driver) {
-//		// wait and intercept JS alert if it occurs on a page
-//		try {
-//			// time interval as second arg of constructor is in seconds
-//			WebDriverWait wait = new WebDriverWait(driver, 1);
-//			wait.until(ExpectedConditions.alertIsPresent());
-//			Alert alert = driver.switchTo().alert();
-//			alert.accept();
-//		} catch (Exception e) {
-//			// exception means no popup, do nothing
-//		}
-//		;
-//	}
-
 	public static boolean detectHoneypot(Element element) {
-		// detect whether an element is set to display:none, these shouldn't be
-		// crawled
+		// detect whether an element is set to display:none
 		String idOfElement = null;
 		String classOfElement = null;
-
 		try {
 			idOfElement = element.attributes().get("id");
 			classOfElement = element.attributes().get("class");
-			// System.out.println("element: " + element.toString() + " id: " +
-			// idOfElement + " class: " + classOfElement);
 
 			if (!idOfElement.equals(null) && !idOfElement.isEmpty()) {
-				// if the id of element exists and is styled as display:none,
-				// could be a trap so return true
+				// don't follow an id with display:none,
 				if (driver.findElement(By.id(idOfElement)).getCssValue("display").equals("none")) {
-					// element is no good
-
 					return true;
 				}
 			}
 
 			if (!classOfElement.equals(null) && !classOfElement.isEmpty()) {
-				// if the class of element exists and is styled as display:none,
-				// could be a trap so return true
+				// don't follow a class with display:none,
 				if (driver.findElement(By.className(classOfElement)).getCssValue("display").equals("none")) {
-//					System.out.println("Main.detectHoneypot - display:none link or trap detected");
 					return true;
 				}
 			}
 
 			if (element.attr("style").contains("none") && element.attr("style").contains("display")) {
-//				System.out.println("Main.detectHoneypot - display:none link or trap detected");
+				// don't follow link with display:none styled inline
 				return true;
 			}
-
 		} catch (Exception e) {
 			// do nothing
 		}
-
 		return false;
 	}
 	
