@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayDeque;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,8 +57,10 @@ public class Main {
 
 	// arraylists to store visited and unvisited urls, and the HashSet of
 	// ArrayLists to store contact objects
-	private static HashSet<String> visitedLinks = new HashSet<>();
-	private static LinkedList<String> collectedLinks = new LinkedList<>();
+
+	private static ArrayDeque<String> linkQueue = new ArrayDeque<>();
+	private static HashSet<String> usedLinks = new HashSet<>();
+	
 	private static HashSet<ContactObject> masterContactSet = new HashSet<>();
 	private static HashMap<String, Integer> masterKeywordMap = new HashMap<>();
 
@@ -77,19 +80,6 @@ public class Main {
 
 		setupArgs(args);
 		long initialTime = System.nanoTime();
-
-		// first round
-		pagesHit++;
-		driver.get(originUrl);
-		String source = driver.getPageSource();
-		
-		visitedLinks.add(originUrl);
-//		handleJavascriptAlert(driver);
-		mapKeywords(driver.findElement(By.tagName("body")).getText());
-		pullContacts(source, originUrl);
-		pullLinks(source);
-
-		crawlComplete = false;
 
 		// create PrintWriter for appending to the the output file
 		try {
@@ -112,10 +102,22 @@ public class Main {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		// first round
+		pagesHit++;
+		driver.get(originUrl);
+		String source = driver.getPageSource();
+		
+//		handleJavascriptAlert(driver);
+		mapKeywords(driver.findElement(By.tagName("body")).getText());
+		pullContacts(source, originUrl);
+		pullLinks(source);
+
+		crawlComplete = false;
 
 		while (!crawlComplete) {
 
-			if (!collectedLinks.iterator().hasNext()) {
+			if (linkQueue.peek() == null) {
 				// if there are no more collected links, it's over!
 				crawlComplete = true;
 			} else if (masterContactSet.size() >= extractionCap || pagesHit >= pageHitCap) {
@@ -123,7 +125,8 @@ public class Main {
 				crawlComplete = true;
 			} else {
 				// if there's more, visit the next one
-				visitUrl(collectedLinks.iterator().next());
+				System.out.println(linkQueue.peek());
+				visitUrl(linkQueue.remove());
 			}
 			try {
 				Thread.sleep((int) Math.random() * 300 + 1600 + (int) Math.random() * 300);
@@ -145,7 +148,7 @@ public class Main {
 			System.out.println(
 					"Contacts: ".concat(String.valueOf(masterContactSet.size()) + "/" + extractionCap + " -- Queries: ")
 							.concat(String.valueOf(pagesHit) + "/" + pageHitCap + " -- Urls Visited: "
-									+ String.valueOf(visitedLinks.size() + "\n")));
+									+ String.valueOf(usedLinks.size() + "\n")));
 			System.out.println("Full-Search-Keywords: " + String.join("_", Keymaster.topKeywords(masterKeywordMap)));
 			printWriter.close();
 		}
@@ -176,8 +179,6 @@ public class Main {
 		// handle all the logic of visiting a single URL here, including
 		// extracting links/info
 		pagesHit++;
-		visitedLinks.add(url);
-		cleanCollectedLinks();
 		// before attempting to hit the page, add link to visited and clean
 		try {
 			System.out.println(
@@ -267,8 +268,6 @@ public class Main {
 	}
 
 	private static void pullLinks(String htmlPage) {
-		// this method pulls links from a page, if they haven't been visited,
-		// add into unvisited ArrayList<URL>
 
 		// call sister method to pull relative links
 		pullRelativeLinks(htmlPage);
@@ -282,20 +281,18 @@ public class Main {
 			String possibleUrl = link.absUrl("href");
 
 			if (!possibleUrl.equals("") && !detectHoneypot(link)) {
-				// if the link attr isn't empty, and honeypot not detected, make
-				// a URL
+				// if the link attr isn't empty, and honeypot not detected
 				URL theUrl = NetworkUtils.makeURL(possibleUrl, originUrl);
-
 				if (RegexUtils.urlDomainNameMatch(originUrl, theUrl.toString())) {
-					// if the string version of url is within the same domain as
-					// original query
-					if (!visitedLinks.contains(theUrl.toString())
+					// url is within the same domain
+					if (!usedLinks.contains(theUrl.toString())
 							&& !RegexUtils.unwantedUrlDestination(theUrl.toString())) {
 						// If the link isn't contained within the visitedLinks
 						// set and isn't a file
 						// System.out.println("Adding Undiscovered URL: " +
 						// theUrl.toString());
-						collectedLinks.add(theUrl.toString());
+						linkQueue.add(theUrl.toString());
+						usedLinks.add(theUrl.toString());
 					}
 				}
 			}
@@ -341,51 +338,21 @@ public class Main {
 						// using original protocol
 						absLink = NetworkUtils.makeURL(originUrl, originUrl).getProtocol().concat(":")
 								.concat(relativeUrl);
-						System.out.println("Main.pullRel discovered protocol-relative URL: " + absLink);
 					}
 					// System.out.println("Main.PullRel found URL at " +
 					// absLink);
-					if (!visitedLinks.contains(absLink)) {
-						// if the Url from the relative link is deemed good and
-						// is not null, add into collectedLinks
-						try {
-							String refinedUrl = NetworkUtils.makeURL(absLink, originUrl).toString();
-							if (refinedUrl != null) {
-								collectedLinks.add(refinedUrl);
-							}
-						} catch (NullPointerException e) {
-							e.printStackTrace();
+					try {
+						String refinedUrl = NetworkUtils.makeURL(absLink, originUrl).toString();
+						if (refinedUrl != null && !usedLinks.contains(refinedUrl)) {
+							linkQueue.add(refinedUrl);
+							usedLinks.add(refinedUrl);
 						}
-
+					} catch (NullPointerException e) {
+						e.printStackTrace();
 					}
 				}
 			}
 		}
-	}
-
-	private static void cleanCollectedLinks() {
-		// iterator to go over and clean out collectedLinks HashSet
-		for (Iterator<String> itr = visitedLinks.iterator(); itr.hasNext();) {
-			String thisURL = (String) itr.next();
-			if (urlInLinkedList(NetworkUtils.makeURL(thisURL, originUrl), collectedLinks)) {
-				try {
-					collectedLinks.remove(thisURL);
-				} catch (NullPointerException e) {
-					System.out.println("MA.cleanCollected threw NullPointerException on " + thisURL);
-					e.printStackTrace();
-				}
-			}
-			if (RegexUtils.unwantedUrlDestination(thisURL)) {
-				// test if link ends in filename, if so delete
-				try {
-					collectedLinks.remove(thisURL);
-				} catch (NullPointerException e) {
-					System.out.println("MA.cleanCollected threw NullPointerException on " + thisURL);
-					e.printStackTrace();
-				}
-			}
-		}
-
 	}
 
 	private static void mapKeywords(String input) {
@@ -501,14 +468,13 @@ public class Main {
 				// if the class of element exists and is styled as display:none,
 				// could be a trap so return true
 				if (driver.findElement(By.className(classOfElement)).getCssValue("display").equals("none")) {
-					System.out.println("Main.detectHoneypot - display:none link or trap detected");
+//					System.out.println("Main.detectHoneypot - display:none link or trap detected");
 					return true;
 				}
 			}
 
 			if (element.attr("style").contains("none") && element.attr("style").contains("display")) {
-				System.out.println("found inline style that hides the damn thing: " + element.attr("style"));
-				System.out.println("Main.detectHoneypot - display:none link or trap detected");
+//				System.out.println("Main.detectHoneypot - display:none link or trap detected");
 				return true;
 			}
 
