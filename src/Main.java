@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Random;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -25,12 +26,14 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.PrintWriter;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
+import java.awt.AWTException;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.Robot;
 
 public class Main {
 
@@ -76,6 +79,11 @@ public class Main {
 	public static void main(String[] args) {
 		// set up the Webdriver, currently chrome driver
 		initiateWebdriver();
+		try {
+			runRobot();
+		} catch (AWTException e){
+			e.printStackTrace();
+		}
 		// set up all the arguments supplied by the user
 
 		setupArgs(args);
@@ -125,7 +133,6 @@ public class Main {
 				crawlComplete = true;
 			} else {
 				// if there's more, visit the next one
-				System.out.println(linkQueue.peek());
 				visitUrl(linkQueue.remove());
 			}
 			try {
@@ -483,6 +490,20 @@ public class Main {
 		}
 
 		return false;
+	}
+	
+	public static void runRobot() throws AWTException{
+        Robot skynet = new Robot();
+        Random random = new Random();
+        Point pObj;
+        while(true){
+            skynet.delay(60000);
+            pObj = MouseInfo.getPointerInfo().getLocation();
+            skynet.mouseMove(pObj.x + 1, pObj.y);
+            pObj = MouseInfo.getPointerInfo().getLocation();
+            skynet.delay(100);
+            skynet.mouseMove(pObj.x - 1, pObj.y);
+        }
 	}
 
 }
