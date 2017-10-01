@@ -11,12 +11,12 @@ public class NetworkUtils {
 		}
 
 		if (!string.startsWith("http")) {
-			System.out.println("NUtils.makeURL failed to detect protocol in " + string);
+//			System.out.println("NUtils.makeURL failed to detect protocol in " + string);
 			if (!string.toLowerCase().contains(firstUrl.toLowerCase())) {
 				// if it finds a pulled link that is expressed as a relative
 				// rather than absolute
-				System.out.println("NUtils.makeURL detected relative href, " + string + " attempting to turn into "
-						+ firstUrl + string);
+//				System.out.println("NUtils.makeURL detected relative href, " + string + " attempting to turn into "
+//						+ firstUrl + string);
 				string = firstUrl + string;
 			}
 			// if the user forgot to put in the protocol, guess http and put it
@@ -24,7 +24,7 @@ public class NetworkUtils {
 			// TODO: find a way to see if the real URL is http or https and
 			// append the correct one
 			string = "http://" + string;
-			System.out.println("NetworkUtils.makeURl appended (guessed) http:// protocol to make " + string);
+//			System.out.println("NetworkUtils.makeURl appended (guessed) http:// protocol to make " + string);
 		}
 
 		URL returnURL = null;

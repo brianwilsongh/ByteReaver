@@ -6,7 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RegexUtils {
-	public static HashSet<String> findEmails(String input, String origin) {
+	public static HashSet<String> findEmails(String input) {
 
 		// HashSet that will contain emails from input string
 		HashSet<String> emailsDiscovered = new HashSet<>();
@@ -21,10 +21,9 @@ public class RegexUtils {
 
 			if (token != null && token != "") {
 
-				token = token.replaceAll("mailto:", ""); //drop the mailto: link if it's there
 				//compile email regex
 				Pattern pattern = Pattern.compile(
-						"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", 
+						"[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,8}(\\.[A-Z]{2,8})?", 
 						Pattern.CASE_INSENSITIVE
 						);
 				Matcher matcher = pattern.matcher(token);

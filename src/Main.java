@@ -81,24 +81,26 @@ public class Main {
 		// first round
 		pagesHit++;
 		driver.get(originUrl);
+		String source = driver.getPageSource();
+		
 		visitedLinks.add(originUrl);
 //		handleJavascriptAlert(driver);
 		mapKeywords(driver.findElement(By.tagName("body")).getText());
-		pullContacts(driver.findElement(By.tagName("body")).getText(), originUrl);
-		pullLinks(driver.getPageSource());
+		pullContacts(source, originUrl);
+		pullLinks(source);
 
 		crawlComplete = false;
 
 		// create PrintWriter for appending to the the output file
 		try {
 			filename = "Output_".concat(new SimpleDateFormat("MM.dd.yyyy").format(new Date()))
-					.concat("_" + NetworkUtils.getHostName(originUrl) + ".txt");
+					.concat("_" + NetworkUtils.getHostName(originUrl) + ".csv");
 
 			fileWriter = new FileWriter(filename);
 			bufferedWriter = new BufferedWriter(fileWriter);
 			printWriter = new PrintWriter(bufferedWriter);
 			String startTime = new SimpleDateFormat("HH:mm:ss").format(new Date());
-			printWriter.println("START ".concat(startTime).concat("\n"));
+			System.out.println("START ".concat(startTime).concat("\n"));
 			bufferedWriter.flush();
 
 			try {
@@ -130,8 +132,7 @@ public class Main {
 			}
 		}
 
-		System.out.println("Main.class -- CRAWL COMPLETE in " + ((System.nanoTime() - initialTime) / 1000000000 / 60)
-				+ "m -- shutting down");
+		System.out.println("URLs depleted OR threshold has been met!");
 	}
 
 	static class ShutdownThread extends Thread {
@@ -140,16 +141,12 @@ public class Main {
 			// end
 			System.out.println("Shutdown Thread Executed @ " + new SimpleDateFormat("MM.dd.yyyy HH.mm.ss").format(new Date()));
 			String startTime = new SimpleDateFormat("HH:mm:ss").format(new Date());
-			printWriter.println();
-			printWriter.println();
-			printWriter.println("END ".concat(startTime));
-			printWriter.println();
-			printWriter.print(
+			System.out.println("CRAWL SHUTDOWN ".concat(startTime));
+			System.out.println(
 					"Contacts: ".concat(String.valueOf(masterContactSet.size()) + "/" + extractionCap + " -- Queries: ")
 							.concat(String.valueOf(pagesHit) + "/" + pageHitCap + " -- Urls Visited: "
 									+ String.valueOf(visitedLinks.size() + "\n")));
-			printWriter.print("Full-Search-Keywords: " + String.join("_", Keymaster.topKeywords(masterKeywordMap)));
-
+			System.out.println("Full-Search-Keywords: " + String.join("_", Keymaster.topKeywords(masterKeywordMap)));
 			printWriter.close();
 		}
 	}
@@ -205,7 +202,7 @@ public class Main {
 				pullLinks(theHtml);
 			}
 
-			// clean tracks and wait (THIS IS UNTESTED)
+			// clean out cookies
 			driver.manage().deleteAllCookies();
 			return;
 
@@ -218,10 +215,10 @@ public class Main {
 		}
 	}
 
-	private static void pullContacts(String theBody, String currentUrl) {
+	private static void pullContacts(String source, String currentUrl) {
 		// create a hashset from .purify function of page
-		HashSet<String> tempSetEmail = RegexUtils.findEmails(theBody, originUrl);
-		HashSet<PersonObject> tempSetPersonObject = RegexUtils.findNames(theBody);
+		HashSet<String> tempSetEmail = RegexUtils.findEmails(source);
+		HashSet<PersonObject> tempSetPersonObject = RegexUtils.findNames(source);
 
 		masterSetPersonObjects.addAll(tempSetPersonObject); //not currently being used
 		
@@ -253,14 +250,13 @@ public class Main {
 							printWriter.print(emailItem);
 						}
 						if (thisPersonObject != null) {
-							printWriter.print(", " + thisPersonObject.printFull());
+//							printWriter.print(", " + thisPersonObject.printFull());
 						}
 						if (keywordArray != null) {
 							//no keywords
 //							printWriter.print(", " + String.join("_", keywordArray));
 						}
 						printWriter.println(""); // just to get to the next line
-						printWriter.println();
 						bufferedWriter.flush();
 					} catch (Exception e) {
 						e.printStackTrace();
