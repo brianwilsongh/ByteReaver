@@ -79,15 +79,14 @@ public class Main {
 	public static void main(String[] args) {
 		// set up the Webdriver, currently chrome driver
 		initiateWebdriver();
-		try {
-			runRobot();
-		} catch (AWTException e){
-			e.printStackTrace();
-		}
 		// set up all the arguments supplied by the user
 
 		setupArgs(args);
 		long initialTime = System.nanoTime();
+		
+		//robot on thread to prevent blocking
+		Thread robotThread = new RobotThread();
+		robotThread.start();
 
 		// create PrintWriter for appending to the the output file
 		try {
@@ -158,6 +157,16 @@ public class Main {
 									+ String.valueOf(usedLinks.size() + "\n")));
 			System.out.println("Full-Search-Keywords: " + String.join("_", Keymaster.topKeywords(masterKeywordMap)));
 			printWriter.close();
+		}
+	}
+	
+	static class RobotThread extends Thread {
+		public void run() {
+			try {
+				runRobot();
+			} catch (AWTException e){
+				e.printStackTrace();
+			}
 		}
 	}
 
